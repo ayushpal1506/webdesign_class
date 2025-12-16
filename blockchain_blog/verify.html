@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification | BlockLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <h2 class="logo">BlockLearn</h2>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="blogs.html">Blogs</a></li>
+            <li><a href="verify.html" class="active">Verification Demo</a></li>
+            <li><a href="why.html">Why Blockchain</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero small">
+        <h1>Certificate Verification Demo</h1>
+        <p>Applying blockchain concepts in a real-world use case</p>
+    </section>
+
+    <!-- CONTENT -->
+    <section class="blog-content">
+
+        <div class="card">
+            <h2>About This Demo</h2>
+            <p>
+                This page demonstrates how blockchain concepts can be used to
+                verify certificates. Each certificate is treated as a block and
+                linked using cryptographic hashes, making the system tamper-proof.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>How It Works</h2>
+            <ul>
+                <li>User enters certificate details</li>
+                <li>Data is converted into a hash</li>
+                <li>Hash is linked to the previous block</li>
+                <li>Blockchain integrity is verified</li>
+            </ul>
+        </div>
+
+        <div class="card highlight">
+            <h2>Note</h2>
+            <p>
+                This is a frontend-only simulation created for educational
+                purposes to visually demonstrate blockchain principles.
+            </p>
+        </div>
+
+
+        <div class="card">
+            <h2>Blockchain-Based Certificate Verification</h2>
+            <form>
+                <input id="name" placeholder="Student Name">
+                <input id="cert" placeholder="Certificate ID">
+                <button  type="button" class="btn" onclick="addBlock()">Add Certificate to Blockchain</button>
+                <button type="button" class="btn" onclick="verifyCertificate()">
+                    Verify Certificate
+                </button>
+
+            </form>
+            <h2>Status: <span id="status"></span></h2>
+            <h2>Blockchain Ledger</h2>
+            <div id="chain"></div>
+            </div>
+        </div>
+
+    </section>
+
+
+    
+    <script>
+    let blockchain = [];
+    
+    function hashFunction(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash << 5) - hash + str.charCodeAt(i);
+            hash |= 0;
+        }
+        return hash.toString();
+    }
+    
+    
+    blockchain.push({
+        index: 0,
+        data: "Genesis Block",
+        prevHash: "0",
+        hash: hashFunction("Genesis Block0")
+    });
+    
+    function addBlock() {
+        const name = document.getElementById("name").value;
+        const cert = document.getElementById("cert").value;
+        if (!name || !cert) return alert("Enter all fields");
+    
+        const prevBlock = blockchain[blockchain.length - 1];
+        const data = name + cert;
+        const newHash = hashFunction(data + prevBlock.hash);
+    
+        blockchain.push({
+            index: blockchain.length,
+            data: data,
+            prevHash: prevBlock.hash,
+            hash: newHash
+        });
+    
+        renderChain();
+    }
+    
+  
+
+
+    function verifyChain() {
+        for (let i = 1; i < blockchain.length; i++) {
+            const current = blockchain[i];
+            const previous = blockchain[i - 1];
+    
+            const recalculatedHash = hashFunction(current.data + previous.hash);
+            if (current.hash !== recalculatedHash) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    function renderChain() {
+        const chainDiv = document.getElementById("chain");
+        chainDiv.innerHTML = "";
+        blockchain.forEach(block => {
+            chainDiv.innerHTML += `
+            <div class="block">
+                <b>Block #${block.index}</b><br>
+                <b>Data:</b> ${block.data}<br>
+                <b>Previous Hash:</b>
+                <div class="hash">${block.prevHash}</div>
+                <b>Hash:</b>
+                <div class="hash">${block.hash}</div>
+            </div>`;
+        });
+    }
+
+
+    function verifyCertificate() {
+        const name = document.getElementById("name").value;
+        const cert = document.getElementById("cert").value;
+    
+        if (!name || !cert) {
+            alert("Enter certificate details");
+            return;
+        }
+    
+        const data = name + cert;
+    
+        // find matching block
+        const exists = blockchain.some(block => block.data === data);
+    
+        if (!exists) {
+            document.getElementById("status").innerHTML =
+                "<span class='invalid'>Certificate Not Found ❌</span>";
+            return;
+        }
+    
+        // now check blockchain integrity
+        if (!verifyChain()) {
+            document.getElementById("status").innerHTML =
+                "<span class='invalid'>Blockchain Tampered ❌</span>";
+            return;
+        }
+    
+        document.getElementById("status").innerHTML =
+            "<span class='valid'>Certificate Verified Successfully ✅</span>";
+    }
+    renderChain();
+    </script>
+
+    <!-- FOOTER -->
+    <!-- <footer>
+        <p>© 2025 BlockLearn | Blockchain Verification Demo</p>
+    </footer> -->
+
+</body>
+</html>
